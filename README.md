@@ -1,4 +1,4 @@
-# seq2seq-SC
+<!-- # seq2seq-SC
 
 ## Citation
 
@@ -9,7 +9,7 @@
     journal={arXiv preprint arXiv:2210.15237},
     year = {2022},
 }
-```
+``` -->
 
 ## Setup
 
@@ -38,7 +38,7 @@ mkdir -p $out_dir
 python -m preprocess.europarl -j $njobs -o $out_dir $europarl_dataset
 ```
 
-### AllNLI
+<!-- ### AllNLI
 
 Run `./scripts/preprocess_allnli.sh` or the following commands
 
@@ -53,7 +53,7 @@ out_dir="$data_path/processed"
 
 mkdir -p $out_dir
 python -m preprocess.allnli -o $out_dir $allnli_dataset
-```
+``` -->
 
 ### Flickr30K 
 

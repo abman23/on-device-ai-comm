@@ -1,4 +1,4 @@
-name: seq2seq-sc
+name: on-device-ai-comm
 channels:
   - huggingface
   - anaconda
@@ -158,4 +158,4 @@ dependencies:
       - yapf==0.32.0
       - yarl==1.8.1
       - zipp==3.11.0
-prefix: /home/danny911kr/miniconda3/envs/seq2seq-sc
+prefix: /home/danny911kr/miniconda3/envs/on-device-ai-comm

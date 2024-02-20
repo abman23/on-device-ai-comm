@@ -1,4 +1,4 @@
-output_dir='checkpoints/on-device-ai-comm'
+output_dir='checkpoints/on-device-ai-comm/train_CDL-A_ebnodb_5_15'
 trainset_path='data/europarl/processed/train.csv'
 devset_path='data/europarl/processed/test.csv'
 

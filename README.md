@@ -1,16 +1,3 @@
-<!-- # seq2seq-SC
-
-## Citation
-
-```bash
-@misc{lee2022seq2seqSC,
-    author = {Lee, Ju-Hyung and Lee, Dong-Ho and Sheen, Eunsoo and Choi, Thomas and Pujara, Jay and Kim, Joongheon},
-    title = {Seq2Seq-SC: End-to-End Semantic Communication Systems with Pre-trained Language Model},
-    journal={arXiv preprint arXiv:2210.15237},
-    year = {2022},
-}
-``` -->
-
 # On-device AI Communication
 
 This project presents an innovative on-device AI communication system, integrating pre-trained language models with physical layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
@@ -20,6 +7,11 @@ This project presents an innovative on-device AI communication system, integrati
 - Efficiency and Robustness: Our approach reduces transmission size by 50% without compromising message integrity, demonstrating superior performance under standard 3GPP channel models.
 - Pre-trained Models for Generalization: Utilizing pre-trained BART models, we enhance the system's ability to generalize across different data domains, making it highly adaptable.
 
+<!-- ## Project structure
+![file structure](./figures/file_structure.png) -->
+
+## Model Architecture
+![Model architecture](<./figures/On-device AI comm.png>)
 ## Setup
 
 Clone the repository and set up the environment:
@@ -175,3 +167,15 @@ python eval.py \
 ```
 
 
+## Citation
+
+```bash
+@misc{lee2024integrating,
+      title={Integrating Pre-Trained Language Model with Physical Layer Communications}, 
+      author={Ju-Hyung Lee and Dong-Ho Lee and Joohan Lee and Jay Pujara},
+      year={2024},
+      eprint={2402.11656},
+      archivePrefix={arXiv},
+      primaryClass={cs.IT}
+}
+```

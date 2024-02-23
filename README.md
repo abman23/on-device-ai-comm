@@ -27,6 +27,7 @@ This project presents an on-device AI communication system, integrating pre-trai
 
 </div>
 We provide example scripts on how to use checkpoints at train, evaluation sections below.
+
 ## Setup
 
 Clone the repository and set up the environment:

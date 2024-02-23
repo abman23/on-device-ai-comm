@@ -13,6 +13,20 @@ This project presents an on-device AI communication system, integrating pre-trai
 ## Model Architecture
 ![Model architecture](<./figures/On-device AI comm.png>)
 - Each channel model(e.g., ChannelAWGN) includes channel En/Decoder, mapper, or channel(AWGN, CDL, etc.).
+
+## Available checkpoints for On-Device AI Communication
+<div align="center">
+
+| #   | Transmission | embedding <br>dimension | # of <br> embeddings    |  Download Link                                                                                     |
+| :---: | :------------: | :-----------------: | :--------------: |  :-------------------------------------------------------------------------------------------------: |
+| 1   | tanh  | -       | -         |  <!--[config.json](https://drive.google.com/file/d/1PCKG-V3XOdNYYHxaVwOqnjjymGQL7h-G/view?usp=sharing) , -->[tf_model.h5](https://drive.google.com/file/d/156PpJPNYzHAlXGv1M_y9H9eRnUXrnFTt/view?usp=sharing)|
+| 2   | VectorQuantizer  | 2 | 1024 |  <!--[config.json](https://drive.google.com/file/d/1K2OUsJrK9OOtm8MhcS0pP2QjIJWmuc61/view?usp=sharing) , -->[tf_model.h5](https://drive.google.com/file/d/13gBtLnKo8wwJV6_ZdGHB3AR8WlAyEsJN/view?usp=sharing)|
+| 3   | VectorQuantizer  | 4 | 1024 |  <!--[config.json](https://drive.google.com/file/d/1E9IS3iVrkwcAu-W4JB8m0hH2k9eV_kia/view?usp=sharing) , -->[tf_model.h5](https://drive.google.com/file/d/1OwQ69NGi6INKAExjwVNqr2pe1l3fs2tr/view?usp=sharing)|
+| 4   | VectorQuantizer  | 8 | 1024 |  <!--[config.json](https://drive.google.com/file/d/1orlAGEbg7N1SNLoQX0w5Tn8d6g34kySG/view?usp=sharing) , -->[tf_model.h5](https://drive.google.com/file/d/12qrKD-q7habrlrm-5BSS9dnUebYEPdF3/view?usp=sharing)|
+| 5   | VectorQuantizer  | 16 | 1024 |  <!--[config.json](https://drive.google.com/file/d/1XyqlUTNO-O8_CsSSaB95lY-0VJvqUVcV/view?usp=sharing) , -->[tf_model.h5](https://drive.google.com/file/d/1DQCapmhGIeFmP66Y11bDzHbsyWJ-MYBC/view?usp=sharing)|
+
+</div>
+We provide example scripts on how to use checkpoints at train, evaluation sections below.
 ## Setup
 
 Clone the repository and set up the environment:
@@ -124,6 +138,8 @@ python train.py \
     --dataset_config 3.0.0
 ```
 
+- For more arguments for training, please navigate to [here](./train/args.py).
+
 ## Evaluation
 
 You can use the script `scripts/eval.sh` or the following commands:
@@ -166,8 +182,7 @@ python eval.py \
     --testset-path "${testset_path}" \
     $checkpoint_dir
 ```
-
-
+- Note that the name of model checkpoint in checkpoint_dir should be 'tf_model.h5'.
 ## Citation
 
 ```bash

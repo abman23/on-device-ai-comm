@@ -12,6 +12,7 @@ This project presents an on-device AI communication system, integrating pre-trai
 
 ## Model Architecture
 ![Model architecture](<./figures/On-device AI comm.png>)
+- Each channel model(e.g., ChannelAWGN) includes channel En/Decoder, mapper, or channel(AWGN, CDL, etc.).
 ## Setup
 
 Clone the repository and set up the environment:

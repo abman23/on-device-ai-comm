@@ -1,6 +1,6 @@
 # On-device AI Communication
 
-This project presents an innovative on-device AI communication system, integrating pre-trained language models with physical layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
+This project presents an on-device AI communication system, integrating pre-trained language models with physical layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
 
 ## Highlights
 - Integration with Physical Layer Communications: We seamlessly integrate language models with physical communication layers, optimizing for noisy environments through a novel noise-tuning method.

@@ -6,7 +6,7 @@ This repo is the implementation for our paper ["Integrating Pre-Trained Language
 ## Highlights
 - Fine-tuned a pre-trained LLM (BART) under noisy conditions (3GPP CDL-family channel model) in end-to-end Link-Level Simulation (LLS), integrating with 5G-NR PHY layer functions.
 - Developed a compression & quantization method for AI-to-AI comm, reducing transmission size by 50% without compromising performance.
-- Tested the framework in NVIDIA Sionna LLS with a 5G-NR PHY setup
+- Verified the framework in NVIDIA Sionna LLS within a 5G-NR PHY setup
 <!-- Efficiency and Robustness: Our approach reduces transmission size by 50% without compromising message integrity, demonstrating superior performance under standard 3GPP channel models. -->
 <!-- - Pre-trained Models for Generalization: Utilizing pre-trained BART models, we enhance the system's ability to generalize across different data domains, making it highly adaptable. -->
 

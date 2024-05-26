@@ -18,10 +18,10 @@ def from_pretrained(path, ebno_db, bin_conv_method, channel_type,
                     scenario, perfect_csi,
                     channel_num_tx_ant=1, channel_num_rx_ant=1,
                     num_bits_per_symbol=4):
-    from models.seq2seq_sc import TFSeq2SeqSCForConditionalGeneration
+    from models.on_device_ai_comm import TFOnDeviceAICForConditionalGeneration
     import transformers
     
-    model = TFSeq2SeqSCForConditionalGeneration.from_pretrained(
+    model = TFOnDeviceAICForConditionalGeneration.from_pretrained(
         path, ebno_db=ebno_db,
         bin_conv_method=bin_conv_method, channel_type=channel_type,
         fec_type=fec_type, cdl_model=cdl_model,
@@ -75,9 +75,6 @@ def predict(path, ebno_db,
         pred_sentences.extend(output_strs)
         bers.append(output.ber.numpy())
 
-        print(f'output_strs: {output_strs}') # XXX
-        print(f'ber: {output.ber.numpy()}') # XXX
-
     mean_ber = sum(bers) / len(bers)
 
     res = {
@@ -94,16 +91,14 @@ def get_predictions(path, ebno_db, test_data_path,
         channel_type, fec_type, cdl_model,
         scenario, perfect_csi,
         channel_num_tx_ant,channel_num_rx_ant, num_bits_per_symbol,
-        embedding_dim, num_embeddings):
+        embedding_dim, num_embeddings,
+        calc_flops):
     path = pathlib.Path(path)
     if not prediction_json_path.exists():
         print('Missing predictions.json')
-        
-        print('Calculate flops.')
+
         with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], with_flops=True,record_shapes=True) as prof:
-            with record_function("model_inference"):
-                
-        
+            with record_function("model_inference"):        
                 res = predict(
                     path=path, 
                     ebno_db=ebno_db, 
@@ -123,7 +118,8 @@ def get_predictions(path, ebno_db, test_data_path,
                     embedding_dim=embedding_dim,
                     num_embeddings=num_embeddings
                 )
-        print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
+        if calc_flops:
+            print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=10))
 
         # save result
         with open(prediction_json_path, 'w') as f:
@@ -154,16 +150,11 @@ def calc_sbert(predictions, batch_size, multi_ref, **kwargs):
             device=device)
 
     sentences1 = predictions['pred']
-    print(f'{sentences1=}')
-    print(f'{len(sentences1)=}')
-    print(f'{multi_ref=}')
+    
     if not multi_ref:
         refs = [[s] for s in predictions['input']]
     else:
         refs = predictions['refs']
-    print(f'{refs=}')
-    print(f'{len(refs)=}')
-    print(f'{len(refs[0])=}')
 
     def calc_cos_score(model, hyp_embedding, ref_sentences):
         hyp = hyp_embedding.reshape((1, -1))
@@ -179,7 +170,6 @@ def calc_sbert(predictions, batch_size, multi_ref, **kwargs):
 
     # compute embedding
     pred_embed = model.encode(sentences1, batch_size=batch_size, convert_to_tensor=True)
-    print(f'{pred_embed.shape=}')
     N = pred_embed.shape[0]
     scores = [
             calc_cos_score(model, pred_embed[i], refs[i]) for i in range(N)
@@ -229,7 +219,8 @@ def calc(args):
         channel_num_rx_ant=args.channel_num_rx_ant,
         embedding_dim=int(args.embedding_dim),
         num_embeddings=int(args.num_embeddings),
-        num_bits_per_symbol=args.num_bits_per_symbol)
+        num_bits_per_symbol=args.num_bits_per_symbol,
+        calc_flops=args.calc_flops)
     scorer = METRIC_TO_SCORER[metric]
     results = scorer(
         predictions=predictions,

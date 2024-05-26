@@ -1,0 +1,17 @@
+checkpoints
+**/__pycache__
+data
+.vscode
+**/backup
+**/log
+**/weights
+visualization
+jobs
+
+# ignore log files
+*.log
+
+models/on_device_ai_comm_v2.py
+preprocess/allnli.py
+srun_gpu.sh
+srun_cpu.sh

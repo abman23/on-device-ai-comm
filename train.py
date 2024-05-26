@@ -47,7 +47,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import is_offline_mode
 from transformers.optimization_tf import create_optimizer
 from train.args import ModelArguments, DataTrainingArguments, summarization_name_mapping, Seq2SeqSCArguments
-from models.seq2seq_sc import TFSeq2SeqSCForConditionalGeneration # XXX
+from models.on_device_ai_comm import TFOnDeviceAICForConditionalGeneration
 
 logger = logging.getLogger(__name__)
 
@@ -77,11 +77,10 @@ def main():
         policy = tf.keras.mixed_precision.Policy('mixed_float16')
         tf.keras.mixed_precision.set_global_policy(policy)
 
-    current_time = str(datetime.now())
-    sys.stdout = open(f'./{training_args.output_dir}/train_stdout_{current_time}.log','a')
-    sys.stderr = open(f'./{training_args.output_dir}/train_stderr_{current_time}.log','a')
-    sys.stdout.write("\n\n-----"+current_time+"-----\n\n")
-    sys.stderr.write("\n\n-----"+current_time+"-----\n\n")
+    current_time = datetime.now()
+    current_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")
+    sys.stdout = open(f'./{training_args.output_dir}/train_stdout-{current_time}.log','a')
+    sys.stderr = open(f'./{training_args.output_dir}/train_stderr-{current_time}.log','a')
 
     # region Logging
     logging.basicConfig(
@@ -291,7 +290,7 @@ def main():
         # region Prepare model
         if model_args.model_name_or_path == '' or model_args.model_name_or_path is None:
             # Create a BART model with random initialization
-            model = TFSeq2SeqSCForConditionalGeneration(
+            model = TFOnDeviceAICForConditionalGeneration(
                 ebno_db=seq2seq_sc_args.ebno_db,
                 ebno_db_min=seq2seq_sc_args.ebno_db_min,
                 ebno_db_max=seq2seq_sc_args.ebno_db_max,
@@ -311,7 +310,7 @@ def main():
             )
             print(f'Random Initialized without pre-trained weights.')
         else:
-            model_cls = TFSeq2SeqSCForConditionalGeneration
+            model_cls = TFOnDeviceAICForConditionalGeneration
             # https://huggingface.co/docs/transformers/v4.34.0/en/main_classes/model#transformers.TFPreTrainedModel.from_pretrained
             model = model_cls.from_pretrained(
                 model_args.model_name_or_path,

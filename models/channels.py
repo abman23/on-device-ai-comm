@@ -22,7 +22,7 @@ from transformers.utils import (
 )
 logger = logging.get_logger("transformers")
 
-class AWGNModel(tf.keras.Model):
+class ChannelAWGN(tf.keras.Model):
     """
     Configure AWGN Channel components.
     ref: https://nvlabs.github.io/sionna/api/channel.wireless.html?highlight=awgn#sionna.channel.AWGN
@@ -86,15 +86,16 @@ class AWGNModel(tf.keras.Model):
         self.demapper = Demapper("app", constellation=constellation)
         
         # FEC
+        self.fec_num_iter = fec_num_iter
         if self.fec_type == 'Polar5G':
             self._encoder = Polar5GEncoder(self._k, self._n)
             self._decoder = Polar5GDecoder(
                 self._encoder,
                 dec_type='SC',
-                list_size=8
+                list_size=8,
+                num_iter=self.fec_num_iter
             )
         elif self.fec_type == 'LDPC5G':
-            self.fec_num_iter = fec_num_iter
             self._encoder = LDPC5GEncoder(self._k, self._n)
             self._decoder = LDPC5GDecoder(self._encoder, hard_out=True, num_iter=self.fec_num_iter)
         else:
@@ -114,6 +115,8 @@ class AWGNModel(tf.keras.Model):
         '''
         # reshape input
         input_shape = input.shape
+        
+        # Add dummy zeros in the end of input to fit input shape to a multiple of divisor.
         divisor=self._k
         if np.prod(input_shape) % divisor != 0:
             flatten_input = tf.reshape(input, [-1])
@@ -166,7 +169,7 @@ class AWGNModel(tf.keras.Model):
 
         return b_hat
 
-class CDLModel(tf.keras.Model):
+class ChannelCDL(tf.keras.Model):
     """
     Configure CDL Channel components.
 
@@ -221,10 +224,10 @@ class CDLModel(tf.keras.Model):
         # System parameters
         self._carrier_frequency = 2.6e9
         self._subcarrier_spacing = 15e3 #subcarrier_spacing
-        self._fft_size = 36 #72
-        self._num_ofdm_symbols = 12 #14
-        self._num_ut_ant = int(channel_num_tx_ant) #2 # Must be a multiple of two as dual-polarized antennas are used
-        self._num_bs_ant = int(channel_num_rx_ant) #2 # Must be a multiple of two as dual-polarized antennas are used
+        self._fft_size = 36
+        self._num_ofdm_symbols = 12
+        self._num_ut_ant = int(channel_num_tx_ant) # Must be a multiple of two as dual-polarized antennas are used
+        self._num_bs_ant = int(channel_num_rx_ant) # Must be a multiple of two as dual-polarized antennas are used
         self._num_streams_per_tx = self._num_ut_ant
         self._dc_null = True
         self._num_guard_carriers = [5, 6]
@@ -246,18 +249,6 @@ class CDLModel(tf.keras.Model):
                                 dc_null=self._dc_null,
                                 pilot_pattern=self._pilot_pattern,
                                 pilot_ofdm_symbol_indices=self._pilot_ofdm_symbol_indices)
-
-        # log
-        print(f'{self._rg.num_data_symbols=}')
-        # self._rg.num_data_symbols = self.num_effective_subcarriers * self._num_ofdm_symbols - \
-        #       self.num_pilot_symbols
-        print(f'{self._rg.num_effective_subcarriers=}')
-        print(f'{self._rg._num_ofdm_symbols=}')
-        print(f'{self._rg.num_pilot_symbols=}')
-        # self._rg.num_effective_subcarriers= self._fft_size - self._dc_null - np.sum(self._num_guard_carriers)
-        print(f'{self._rg._fft_size=}')
-        print(f'{self._rg._dc_null=}')
-        print(f'{np.sum(self._rg._num_guard_carriers)=}')
 
         self._n = int(self._rg.num_data_symbols * self._num_bits_per_symbol)
         self._k = int(self._n * self._coderate)
@@ -309,39 +300,21 @@ class CDLModel(tf.keras.Model):
         self.ebno_db_min = ebno_db_min
         self.ebno_db_max = ebno_db_max
 
-        logger.info(f'{self.ebno_db=}')
-        logger.info(f'{self.ebno_db_min=}')
-        logger.info(f'{self.ebno_db_max=}')
-
-        print(f'{self._k=}')
-        print(f'{self._n=}')
-        print(f'{self._coderate=}')
-
-        print(f'{self._fft_size=}')
-        print(f'{self._num_ofdm_symbols=}')
-        print(f'{self._num_bits_per_symbol=}')
-
-        print(f'{self._cdl_model=}')
-        print(f'{self.fec_type=}')
-        print(f'{self._num_ut_ant=}')
-        print(f'{self._num_bs_ant=}')
-
         # FEC
+        self.fec_num_iter = fec_num_iter
         if self.fec_type == 'Polar5G':
             self._encoder = Polar5GEncoder(self._k, self._n)
             self._decoder = Polar5GDecoder(
                 self._encoder,
                 dec_type='SC',
-                list_size=8
+                list_size=8,
+                num_iter=self.fec_num_iter
             )
         elif self.fec_type == 'LDPC5G':
-            self.fec_num_iter = fec_num_iter
             self._encoder = LDPC5GEncoder(self._k, self._n)
             self._decoder = LDPC5GDecoder(self._encoder, hard_out=True, num_iter=self.fec_num_iter)
         else:
             raise ValueError(f"Invalid channel coding type: {fec_type}")
-        
-        print(f'{self.fec_num_iter=}')
 
         self._mapper = Mapper("qam", self._num_bits_per_symbol)
         self._rg_mapper = ResourceGridMapper(self._rg)
@@ -369,6 +342,7 @@ class CDLModel(tf.keras.Model):
         # reshape input
         input_shape = input.shape
 
+        # Add dummy zeros in the end of input to fit input shape to a multiple of divisor.
         divisor=self._num_streams_per_tx * self._k
         if np.prod(input_shape) % divisor != 0:
             flatten_input = tf.reshape(input, [-1])
@@ -447,9 +421,10 @@ class CDLModel(tf.keras.Model):
 
         return b_hat
 
-class RealisticModel(tf.keras.Model):
+class ChannelSL(tf.keras.Model):
     """
     OFDM MIMO transmissions over a 3GPP 38.901 model.
+    (Realistic Multiuser MIMO OFDM)
 
     Parameters
     ----------
@@ -482,11 +457,11 @@ class RealisticModel(tf.keras.Model):
         self._perfect_csi = perfect_csi
 
         # Internally set parameters
-        self._carrier_frequency = 2.6e9 # 3.5e9
-        self._fft_size = 36 # 128
-        self._subcarrier_spacing = 15e3 # 30e3
-        self._num_ofdm_symbols = 12 # 14
-        self._cyclic_prefix_length = 6 # 20
+        self._carrier_frequency = 2.6e9
+        self._fft_size = 36
+        self._subcarrier_spacing = 15e3
+        self._num_ofdm_symbols = 12
+        self._cyclic_prefix_length = 6
         self._pilot_ofdm_symbol_indices = [2, 11]
         self._num_bs_ant = int(channel_num_rx_ant)
         self._num_ut = 1 # number of users communicating with a base station.
@@ -567,44 +542,25 @@ class RealisticModel(tf.keras.Model):
         # Instantiate other building blocks
         self._qam_source = QAMSource(self._num_bits_per_symbol)
 
-        # log
-        print(f'{self._rg.num_data_symbols=}')
-        # self._rg.num_data_symbols = self.num_effective_subcarriers * self._num_ofdm_symbols - \
-        #       self.num_pilot_symbols
-        print(f'{self._rg.num_effective_subcarriers=}')
-        print(f'{self._rg._num_ofdm_symbols=}')
-        print(f'{self._rg.num_pilot_symbols=}')
-        # self._rg.num_effective_subcarriers= self._fft_size - self._dc_null - np.sum(self._num_guard_carriers)
-        print(f'{self._rg._fft_size=}')
-        print(f'{self._rg._dc_null=}')
-        print(f'{np.sum(self._rg._num_guard_carriers)=}')
-
         self._n = int(self._rg.num_data_symbols*self._num_bits_per_symbol) # Number of coded bits
         self._k = int(self._n*self._coderate)                              # Number of information bits
 
-        # log
-        print(f'{self._k=}')
-        print(f'{self._n=}')
-        print(f'{self._coderate=}')
-
-        print(f'{fec_type=}')
-        print(f'{scenario=}')
-        print(f'{perfect_csi=}')
-
         # FEC
+        self.fec_num_iter = fec_num_iter
         if self.fec_type == 'Polar5G':
             self._encoder = Polar5GEncoder(self._k, self._n)
             self._decoder = Polar5GDecoder(
                 self._encoder,
                 dec_type='SC',
-                list_size=8
+                list_size=8,
+                num_iter=self.fec_num_iter
             )
         elif self.fec_type == 'LDPC5G':
-            self.fec_num_iter = fec_num_iter
             self._encoder = LDPC5GEncoder(self._k, self._n)
             self._decoder = LDPC5GDecoder(self._encoder, hard_out=True, num_iter=self.fec_num_iter)
         else:
             raise ValueError(f"Invalid channel coding type: {fec_type}")
+        
         self._mapper = Mapper("qam", self._num_bits_per_symbol)
         self._rg_mapper = ResourceGridMapper(self._rg)
 
@@ -654,6 +610,7 @@ class RealisticModel(tf.keras.Model):
         # reshape input
         input_shape = input.shape
 
+        # Add dummy zeros in the end of input to fit input shape to a multiple of divisor.
         divisor=self._num_tx * self._num_streams_per_tx * self._k
         if np.prod(input_shape) % divisor != 0:
             flatten_input = tf.reshape(input, [-1])
@@ -697,7 +654,7 @@ class RealisticModel(tf.keras.Model):
         
         return b_hat
         
-class FlatFadingModel(tf.keras.Model):
+class ChannelFlatFading(tf.keras.Model):
     """
     Configure FlatFading Channel(for a simulation over RayLeigh) components.
     ref: https://nvlabs.github.io/sionna/examples/Simple_MIMO_Simulation.html?highlight=rayleigh 
@@ -734,10 +691,6 @@ class FlatFadingModel(tf.keras.Model):
         self._n = fec_n
         self._k = fec_k
         self._coderate = self._k / self._n
-        
-        print(f'{self._k=}')
-        print(f'{self._n=}')
-        print(f'{self._coderate=}')
 
         constellation = Constellation("qam",
                                     num_bits_per_symbol,
@@ -767,15 +720,16 @@ class FlatFadingModel(tf.keras.Model):
         self.demapper = Demapper("app", constellation=constellation)
         
         # FEC
+        self.fec_num_iter = fec_num_iter
         if self.fec_type == 'Polar5G':
             self._encoder = Polar5GEncoder(self._k, self._n)
             self._decoder = Polar5GDecoder(
                 self._encoder,
                 dec_type='SC',
-                list_size=8
+                list_size=8,
+                num_iter=self.fec_num_iter
             )
         elif self.fec_type == 'LDPC5G':
-            self.fec_num_iter = fec_num_iter
             self._encoder = LDPC5GEncoder(self._k, self._n)
             self._decoder = LDPC5GDecoder(self._encoder, hard_out=True, num_iter=self.fec_num_iter)
         else:
@@ -795,6 +749,8 @@ class FlatFadingModel(tf.keras.Model):
         '''
         # reshape input
         input_shape = input.shape
+
+        # Add dummy zeros in the end of input to fit input shape to a multiple of divisor.
         divisor=self._k
         if np.prod(input_shape) % divisor != 0:
             flatten_input = tf.reshape(input, [-1])

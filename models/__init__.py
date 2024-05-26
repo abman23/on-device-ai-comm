@@ -1,1 +1,1 @@
-from models.seq2seq_sc import TFSeq2SeqSCMainLayer, TFSeq2SeqSCForConditionalGeneration
+from models.on_device_ai_comm import TFOnDeviceAICMainLayer, TFOnDeviceAICForConditionalGeneration

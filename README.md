@@ -3,12 +3,27 @@
 This project presents an on-device AI/LLM communication system, integrating pre-trained language models with physical (PHY) layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
 
 ## Highlights
-- Integration with Physical Layer Communications: We seamlessly integrate language models with physical communication layers, optimizing for noisy environments through a novel noise-tuning method.
-- Efficiency and Robustness: Our approach reduces transmission size by 50% without compromising message integrity, demonstrating superior performance under standard 3GPP channel models.
-- Pre-trained Models for Generalization: Utilizing pre-trained BART models, we enhance the system's ability to generalize across different data domains, making it highly adaptable.
+- Fine-tuned a pre-trained LLM (BART) under noisy conditions (3GPP CDL-family channel model) in end-to-end Link-Level Simulation (LLS), integrating with 5G-NR PHY layer functions.
+- Developed a compression & quantization method for AI-to-AI comm, reducing transmission size by 50% without compromising performance.
+- Tested the framework in NVIDIA Sionna LLS with a 5G-NR PHY setup
+<!-- Efficiency and Robustness: Our approach reduces transmission size by 50% without compromising message integrity, demonstrating superior performance under standard 3GPP channel models. -->
+<!-- - Pre-trained Models for Generalization: Utilizing pre-trained BART models, we enhance the system's ability to generalize across different data domains, making it highly adaptable. -->
 
 <!-- ## Project structure
 ![file structure](./figures/file_structure.png) -->
+
+## Citation
+
+```bash
+@misc{lee2024integrating,
+      title={Integrating Pre-Trained Language Model with Physical Layer Communications}, 
+      author={Ju-Hyung Lee and Dong-Ho Lee and Joohan Lee and Jay Pujara},
+      year={2024},
+      eprint={2402.11656},
+      archivePrefix={arXiv},
+      primaryClass={cs.IT}
+}
+```
 
 ## Model Architecture
 ![Model architecture](<./figures/On-device AI comm.png>)
@@ -184,15 +199,3 @@ python eval.py \
     $checkpoint_dir
 ```
 - Note that the name of model checkpoint in checkpoint_dir should be 'tf_model.h5'.
-## Citation
-
-```bash
-@misc{lee2024integrating,
-      title={Integrating Pre-Trained Language Model with Physical Layer Communications}, 
-      author={Ju-Hyung Lee and Dong-Ho Lee and Joohan Lee and Jay Pujara},
-      year={2024},
-      eprint={2402.11656},
-      archivePrefix={arXiv},
-      primaryClass={cs.IT}
-}
-```

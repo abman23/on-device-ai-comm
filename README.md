@@ -1,6 +1,6 @@
 # On-Device AI/LLM Communication
 
-This project presents an on-device AI/LLM communication system, integrating pre-trained language models with physical (PHY) layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
+This project presents an on-device AI/LLM communication system, integrating pre-trained LLM with physical (PHY) layer communications. This repo is the implementation for our paper ["Integrating Pre-Trained Language Model with Physical Layer Communications"](https://arxiv.org/abs/2402.11656).
 
 ## Highlights
 - Fine-tuned a pre-trained LLM (BART) under noisy conditions (3GPP CDL-family channel model) in end-to-end Link-Level Simulation (LLS), integrating with 5G-NR PHY layer functions.
